@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Boom Player — Beautiful offline music player</title>
+<meta name="description" content="Boom Player — a beautiful offline music player for Android. Themes, lyrics, playlists, visualizer. No account. No tracking." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>" />
+
+<style>
+  :root {
+    --bg: #0A0A0A;
+    --surface: #141414;
+    --surface-2: #1E1E1E;
+    --border: #262626;
+    --accent: #BB86FC;
+    --accent-soft: rgba(187, 134, 252, 0.15);
+    --text: #FFFFFF;
+    --text-dim: #9CA3AF;
+    --text-dimmer: #6B7280;
+    --radius: 16px;
+    --max-width: 900px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  a:hover {
+    opacity: 0.85;
+  }
+
+  .glow {
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(187, 134, 252, 0.25) 0%, rgba(187, 134, 252, 0.05) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(40px);
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  section {
+    padding: 60px 0;
+  }
+
+  nav {
+    padding: 24px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .brand-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent) 0%, #7C3AED 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 24px;
+    font-size: 14px;
+  }
+
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover {
+    color: var(--text);
+    opacity: 1;
+  }
+
+  .hero {
+    text-align: center;
+    padding: 60px 0 80px;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 .accent {
+    background: linear-gradient(135deg, #BB86FC 0%, #7C3AED 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p.lead {
+    font-size: clamp(16px, 2vw, 19px);
+    color: var(--text-dim);
+    max-width: 560px;
+    margin: 0 auto 40px;
+  }
+
+  .cta-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 28px;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.2s;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #BB86FC 0%, #7C3AED 100%);
+    color: #0A0A0A;
+    box-shadow: 0 8px 30px rgba(187, 134, 252, 0.35);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(187, 134, 252, 0.5);
+    opacity: 1;
+  }
+
+  .btn-secondary {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--surface);
+    opacity: 1;
+  }
+
+  .meta {
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--text-dimmer);
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 640px;
+    margin: 60px auto 0;
+  }
+
+  .stat {
+    text-align: center;
+    padding: 20px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .section-head {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .section-head h2 {
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+
+  .section-head p {
+    color: var(--text-dim);
+    font-size: 16px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .feature {
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .feature:hover {
+    border-color: rgba(187, 134, 252, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .feature-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+
+  .feature h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .feature p {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* ========== Screenshots carousel ========== */
+  .shots {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 8px 4px 24px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .shots::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .shots::-webkit-scrollbar-track {
+    background: var(--surface);
+    border-radius: 3px;
+  }
+
+  .shots::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  .shot-wrap {
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .shot {
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    aspect-ratio: 9 / 19.5;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  }
+
+  .shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .shot-caption {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 500;
+    padding: 0 8px;
+  }
+
+  .steps {
+    display: grid;
+    gap: 16px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    align-items: flex-start;
+  }
+
+  .step-num {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .step-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .step-body p {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .privacy {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px;
+    background: linear-gradient(135deg, rgba(187, 134, 252, 0.1) 0%, rgba(187, 134, 252, 0.02) 100%);
+    border: 1px solid rgba(187, 134, 252, 0.25);
+    border-radius: var(--radius);
+    text-align: center;
+  }
+
+  .privacy h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .privacy p {
+    color: var(--text-dim);
+    font-size: 15px;
+  }
+
+  footer {
+    padding: 60px 0 40px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  footer p {
+    font-size: 13px;
+    color: var(--text-dimmer);
+  }
+
+  footer a {
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 600px) {
+    section { padding: 40px 0; }
+    .hero { padding: 40px 0 60px; }
+    .stats { grid-template-columns: 1fr; margin-top: 40px; }
+    .nav-links { display: none; }
+    .step { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow"></div>
+
+<div class="wrap">
+
+  <nav>
+    <a href="#" class="brand">
+      <span class="brand-dot">🎵</span>
+      <span>Boom Player</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#screenshots">Screenshots</a>
+      <a href="#install">Install</a>
+      <a href="#privacy">Privacy</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-badge">v1.0 · Android</div>
+    <h1>Your music,<br /><span class="accent">the way it deserves.</span></h1>
+    <p class="lead">
+      A beautiful, fast, offline music player for Android.
+      Themes, lyrics, playlists, and a live visualizer — no account, no tracking.
+    </p>
+
+    <div class="cta-row">
+      <a href="app-release.apk" class="btn btn-primary" download>
+        <span>⬇</span>
+        <span>Download APK</span>
+      </a>
+      <a href="#features" class="btn btn-secondary">
+        Learn more
+      </a>
+    </div>
+
+    <p class="meta">
+      Version 1.0 · ~15 MB · Android 7.0+ · Requires music permission
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">Offline</div>
+        <div class="stat-label">No internet needed</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">0 trackers</div>
+        <div class="stat-label">No accounts, no sign-in</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">100% free</div>
+        <div class="stat-label">No in-app purchases</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-head">
+      <h2>Built for people who love music</h2>
+      <p>Everything you need. Nothing you don't.</p>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">🎨</div>
+        <h3>11 Accent Colors</h3>
+        <p>Pick from Purple, Blue, Green, Teal, Red, Pink, Orange, Amber, Black, Grey, or White.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎧</div>
+        <h3>Plays Every Format</h3>
+        <p>MP3, FLAC, AAC, WAV, OGG, and more — with a real ExoPlayer engine.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✨</div>
+        <h3>Live Visualizer</h3>
+        <p>Waveform, bars, both, or pulse — 4 styles that react to your music in real time.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📝</div>
+        <h3>Synced Lyrics</h3>
+        <p>Support for .lrc and .txt lyric files. Fallback to Google lyrics search.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📚</div>
+        <h3>Full Library</h3>
+        <p>Albums, artists, folders, years, recently added, recently played, most played.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🌙</div>
+        <h3>Sleep Timer</h3>
+        <p>Fade-out and auto-pause after 5, 10, 15, 30, 45, or 60 minutes.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <h3>Playback Speed</h3>
+        <p>From 0.5x to 2x — great for podcasts and audiobooks.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <h3>Truly Private</h3>
+        <p>Works completely offline. Your music never leaves your device.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📱</div>
+        <h3>Widget + Notification</h3>
+        <p>Home screen widget and rich notification controls with album art.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="screenshots">
+    <div class="section-head">
+      <h2>See it in action</h2>
+      <p>Swipe through — designed to feel premium.</p>
+    </div>
+
+    <div class="shots">
+      <div class="shot-wrap">
+        <div class="shot"><img src="screenshots/01-now-playing.png" alt="Now Playing" loading="lazy" /></div>
+        <div class="shot-caption">Now Playing</div>
+      </div>
+      <div class="shot-wrap">
+        <div class="shot"><img src="screenshots/02-library.png" alt="Library" loading="lazy" /></div>
+        <div class="shot-caption">Library</div>
+      </div>
+      <div class="shot-wrap">
+        <div class="shot"><img src="screenshots/03-search.png" alt="Search" loading="lazy" /></div>
+        <div class="shot-caption">Search</div>
+      </div>
+      <div class="shot-wrap">
+        <div class="shot"><img src="screenshots/04-themes.png" alt="Themes" loading="lazy" /></div>
+        <div class="shot-caption">Themes</div>
+      </div>
+      <div class="shot-wrap">
+        <div class="shot"><img src="screenshots/05-settings.png" alt="Settings" loading="lazy" /></div>
+        <div class="shot-caption">Settings</div>
+      </div>
+      <div class="shot-wrap">
+        <div class="shot"><img src="screenshots/06-about.png" alt="About" loading="lazy" /></div>
+        <div class="shot-caption">About</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="section-head">
+      <h2>How to install</h2>
+      <p>Takes 30 seconds. No app store required.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Download the APK</h4>
+          <p>Tap the <strong>Download APK</strong> button above. Your browser may warn about downloading — tap <strong>Keep</strong> or <strong>Download anyway</strong>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Open the downloaded file</h4>
+          <p>Open your <strong>Files</strong> or <strong>Downloads</strong> folder and tap <strong>app-release.apk</strong>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Allow installs from this source</h4>
+          <p>Android will say: <em>"For your security, your phone is not allowed to install unknown apps from this source."</em> Tap <strong>Settings</strong> → enable <strong>Allow from this source</strong> → go back → tap <strong>Install</strong>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Grant music permission</h4>
+          <p>When asked, tap <strong>Allow</strong> so the app can find your songs. Nothing is uploaded anywhere.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Play a song 🎧</h4>
+          <p>That's it. Enjoy your music.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy">
+    <div class="privacy">
+      <h3>🔒 Your privacy matters</h3>
+      <p>
+        Boom Player works entirely offline. Your music never leaves your device.
+        No account. No sign-in. No tracking. No ads in the app itself.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Made with 🖤 by Vishruu · <a href="mailto:your-email@example.com">Contact</a></p>
+    <p style="margin-top: 8px;">© 2026 Boom Player. All rights reserved.</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
